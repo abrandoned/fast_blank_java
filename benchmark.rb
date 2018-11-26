@@ -10,11 +10,6 @@ class String
   def new_slow_blank?
     empty? || !(/[[:^space:]]/ === self)
   end
-
-end
-
-class Blanker
-  extend FastBlankJava::FastBlankJava
 end
 
 test_strings = [
@@ -30,12 +25,18 @@ test_strings = [
 ]
 
 test_strings.each do |s|
+  raise "failed on #{s.inspect}" if s.blank? != s.slow_blank?
+  raise "failed on #{s.inspect}" if s.blank? != s.new_slow_blank?
+  raise "failed on #{s.inspect}" if s.blank? != s.fast_blank_java?
+end
+
+test_strings.each do |s|
   puts "\n================== Test String Length: #{s.length} =================="
   Benchmark.ips do |x|
     x.report("Fast Blank Java") do |times|
       i = 0
       while i < times
-        Blanker.fast_blank_as_java?(s)
+        s.fast_blank_java?
         i += 1
       end
     end
@@ -61,97 +62,82 @@ test_strings.each do |s|
 end
 
 # ================== Test String Length: 0 ==================
+# Warming up --------------------------------------
+#      Fast Blank Java   284.023k i/100ms
+#           Slow Blank   192.986k i/100ms
+#       New Slow Blank   290.646k i/100ms
 # Calculating -------------------------------------
-#           Fast Blank   225.251k i/100ms
-#   Fast ActiveSupport   225.676k i/100ms
-#           Slow Blank   110.934k i/100ms
-#       New Slow Blank   221.792k i/100ms
-# -------------------------------------------------
-#           Fast Blank     29.673M (± 2.7%) i/s -    148.215M
-#   Fast ActiveSupport     28.249M (± 3.5%) i/s -    141.048M
-#           Slow Blank      2.158M (± 3.3%) i/s -     10.872M
-#       New Slow Blank     23.558M (± 3.2%) i/s -    117.772M
-#
+#      Fast Blank Java     55.900M (± 9.5%) i/s -    275.218M in   4.997932s
+#           Slow Blank      5.710M (± 5.9%) i/s -     28.562M in   5.021554s
+#       New Slow Blank     33.295M (±10.9%) i/s -    163.052M in   4.999298s
+# 
 # Comparison:
-#           Fast Blank: 29673200.1 i/s
-#   Fast ActiveSupport: 28248894.5 i/s - 1.05x slower
-#       New Slow Blank: 23557900.0 i/s - 1.26x slower
-#           Slow Blank:  2157787.7 i/s - 13.75x slower
-#
-#
+#      Fast Blank Java: 55899919.8 i/s
+#       New Slow Blank: 33295457.1 i/s - 1.68x  slower
+#           Slow Blank:  5710375.9 i/s - 9.79x  slower
+# 
+# 
 # ================== Test String Length: 6 ==================
+# Warming up --------------------------------------
+#      Fast Blank Java   271.907k i/100ms
+#           Slow Blank   142.502k i/100ms
+#       New Slow Blank   228.848k i/100ms
 # Calculating -------------------------------------
-#           Fast Blank   201.185k i/100ms
-#   Fast ActiveSupport   205.076k i/100ms
-#           Slow Blank   102.061k i/100ms
-#       New Slow Blank   123.087k i/100ms
-# -------------------------------------------------
-#           Fast Blank     13.894M (± 2.3%) i/s -     69.409M
-#   Fast ActiveSupport     14.627M (± 3.5%) i/s -     73.212M
-#           Slow Blank      1.943M (± 2.3%) i/s -      9.798M
-#       New Slow Blank      2.796M (± 1.8%) i/s -     14.032M
-#
+#      Fast Blank Java     29.466M (±14.0%) i/s -    143.023M in   5.004893s
+#           Slow Blank      2.741M (± 4.5%) i/s -     13.680M in   5.003036s
+#       New Slow Blank      8.713M (± 6.2%) i/s -     43.481M in   5.011576s
+# 
 # Comparison:
-#   Fast ActiveSupport: 14627063.7 i/s
-#           Fast Blank: 13893631.2 i/s - 1.05x slower
-#       New Slow Blank:  2795783.3 i/s - 5.23x slower
-#           Slow Blank:  1943025.9 i/s - 7.53x slower
-#
-#
+#      Fast Blank Java: 29466276.8 i/s
+#       New Slow Blank:  8713135.2 i/s - 3.38x  slower
+#           Slow Blank:  2740917.7 i/s - 10.75x  slower
+# 
+# 
 # ================== Test String Length: 14 ==================
+# Warming up --------------------------------------
+#      Fast Blank Java   288.228k i/100ms
+#           Slow Blank   193.662k i/100ms
+#       New Slow Blank   202.398k i/100ms
 # Calculating -------------------------------------
-#           Fast Blank   220.004k i/100ms
-#   Fast ActiveSupport   219.716k i/100ms
-#           Slow Blank   147.399k i/100ms
-#       New Slow Blank   106.651k i/100ms
-# -------------------------------------------------
-#           Fast Blank     24.949M (± 3.0%) i/s -    124.742M
-#   Fast ActiveSupport     24.491M (± 3.3%) i/s -    122.382M
-#           Slow Blank      4.292M (± 1.6%) i/s -     21.520M
-#       New Slow Blank      2.115M (± 2.4%) i/s -     10.665M
-#
+#      Fast Blank Java     47.185M (± 9.6%) i/s -    232.600M in   5.002948s
+#           Slow Blank      5.284M (± 6.9%) i/s -     26.338M in   5.013067s
+#       New Slow Blank      6.316M (± 3.9%) i/s -     31.574M in   5.007293s
+# 
 # Comparison:
-#           Fast Blank: 24948558.8 i/s
-#   Fast ActiveSupport: 24491245.1 i/s - 1.02x slower
-#           Slow Blank:  4292490.5 i/s - 5.81x slower
-#       New Slow Blank:  2115097.6 i/s - 11.80x slower
-#
-#
+#      Fast Blank Java: 47184936.5 i/s
+#       New Slow Blank:  6315863.6 i/s - 7.47x  slower
+#           Slow Blank:  5284184.1 i/s - 8.93x  slower
+# 
+# 
 # ================== Test String Length: 24 ==================
+# Warming up --------------------------------------
+#      Fast Blank Java   279.053k i/100ms
+#           Slow Blank   146.723k i/100ms
+#       New Slow Blank   201.917k i/100ms
 # Calculating -------------------------------------
-#           Fast Blank   206.555k i/100ms
-#   Fast ActiveSupport   208.513k i/100ms
-#           Slow Blank   137.733k i/100ms
-#       New Slow Blank   101.215k i/100ms
-# -------------------------------------------------
-#           Fast Blank     16.761M (± 2.7%) i/s -     83.861M
-#   Fast ActiveSupport     17.710M (± 3.2%) i/s -     88.618M
-#           Slow Blank      3.744M (± 2.0%) i/s -     18.732M
-#       New Slow Blank      1.962M (± 2.7%) i/s -      9.818M
-#
+#      Fast Blank Java     35.628M (± 9.4%) i/s -    175.803M in   5.004226s
+#           Slow Blank      2.979M (± 4.6%) i/s -     14.966M in   5.035114s
+#       New Slow Blank      6.137M (± 6.0%) i/s -     30.691M in   5.021130s
+# 
 # Comparison:
-#   Fast ActiveSupport: 17709936.5 i/s
-#           Fast Blank: 16760839.7 i/s - 1.06x slower
-#           Slow Blank:  3744048.4 i/s - 4.73x slower
-#       New Slow Blank:  1961831.1 i/s - 9.03x slower
-#
-#
+#      Fast Blank Java: 35627570.4 i/s
+#       New Slow Blank:  6137345.1 i/s - 5.81x  slower
+#           Slow Blank:  2979206.5 i/s - 11.96x  slower
+# 
+# 
 # ================== Test String Length: 136 ==================
+# Warming up --------------------------------------
+#      Fast Blank Java   277.245k i/100ms
+#           Slow Blank   148.431k i/100ms
+#       New Slow Blank   203.430k i/100ms
 # Calculating -------------------------------------
-#           Fast Blank   201.772k i/100ms
-#   Fast ActiveSupport   189.120k i/100ms
-#           Slow Blank   129.439k i/100ms
-#       New Slow Blank    90.677k i/100ms
-# -------------------------------------------------
-#           Fast Blank     16.718M (± 2.8%) i/s -     83.534M
-#   Fast ActiveSupport     17.617M (± 3.6%) i/s -     87.941M
-#           Slow Blank      3.725M (± 3.0%) i/s -     18.639M
-#       New Slow Blank      1.940M (± 4.8%) i/s -      9.702M
-#
+#      Fast Blank Java     35.853M (± 7.9%) i/s -    177.714M in   5.003505s
+#           Slow Blank      2.982M (± 5.1%) i/s -     14.992M in   5.042856s
+#       New Slow Blank      6.183M (± 5.0%) i/s -     30.921M in   5.015464s
+# 
 # Comparison:
-#   Fast ActiveSupport: 17616782.1 i/s
-#           Fast Blank: 16718307.8 i/s - 1.05x slower
-#           Slow Blank:  3725097.6 i/s - 4.73x slower
-#       New Slow Blank:  1940271.2 i/s - 9.08x slower
-#
-
+#      Fast Blank Java: 35853197.9 i/s
+#       New Slow Blank:  6183303.9 i/s - 5.80x  slower
+#           Slow Blank:  2982078.8 i/s - 12.02x  slower
+# 
+# 

@@ -16,12 +16,12 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 
 public class FastBlankJava {
-  @JRubyMethod(name = "fast_blank_as_java?")
-  public static IRubyObject fast_blank_as_java_p(ThreadContext context, IRubyObject self, IRubyObject recv) {
+  @JRubyMethod(name = { "fast_blank_java?", "blank?" })
+  public static IRubyObject fast_blank_as_java_p(ThreadContext context, IRubyObject self) {
     org.jruby.Ruby runtime = context.getRuntime();
 
-    if (recv instanceof RubyString) {
-      org.jruby.RubyString rubyString = ((RubyString) recv);
+    if (self instanceof RubyString) {
+      org.jruby.RubyString rubyString = ((RubyString) self);
       if (rubyString.isEmpty()) {
         return runtime.getTrue();
       }
@@ -76,6 +76,6 @@ public class FastBlankJava {
       return runtime.getTrue();
     }
 
-    return runtime.getFalse();
+    throw context.getRuntime().newTypeError("can't #fast_blank_java? a non-string object");
   }
 }
