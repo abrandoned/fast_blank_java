@@ -16,14 +16,12 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 
 public class FastBlankJava {
-  @JRubyMethod(name = { "fast_blank_java?", "blank?" })
+  @JRubyMethod(name = { "fast_blank_java_as?", "blank_as?" })
   public static IRubyObject fast_blank_as_java_p(ThreadContext context, IRubyObject self) {
-    org.jruby.Ruby runtime = context.getRuntime();
-
     if (self instanceof RubyString) {
       org.jruby.RubyString rubyString = ((RubyString) self);
       if (rubyString.isEmpty()) {
-        return runtime.getTrue();
+        return context.tru;
       }
 
       ByteList blankValue = rubyString.getByteList();
@@ -67,15 +65,45 @@ public class FastBlankJava {
           case 0x3000:
             break;
           default:
-            return runtime.getFalse();
+            return context.fals;
         }
 
         next_char += len_p[0];
       }
 
-      return runtime.getTrue();
+      return context.tru;
     }
 
     throw context.getRuntime().newTypeError("can't #fast_blank_java? a non-string object");
+  }
+
+  public static boolean rb_isspace(int character) {
+    return character == ' ' || ('\t' <= character && character <= '\r');
+  }
+
+  @JRubyMethod(name = { "fast_blank_java?", "blank?" })
+  public static IRubyObject fast_blank_p(ThreadContext context, IRubyObject self) {
+    Encoding enc;
+    int s, e;
+    byte[] sBytes;
+    Ruby runtime = context.runtime;
+    RubyString str = (RubyString) self;
+    enc = str.getEncoding();
+    ByteList sByteList = str.getByteList();
+    sBytes = sByteList.unsafeBytes();
+    s = sByteList.begin();
+    if (str.size() == 0) return context.tru;
+    e = s + sByteList.realSize();
+    int[] n = {0};
+    int cc = 0;
+
+    while (s < e) {
+      cc = EncodingUtils.encCodepointLength(runtime, sBytes, s, e, n, enc);
+      if (!rb_isspace(cc) && cc != 0) { return context.fals; }
+
+      s += n[0];
+    }
+
+    return context.tru;
   }
 }

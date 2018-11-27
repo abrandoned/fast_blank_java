@@ -10,10 +10,8 @@ import java.io.IOException;
 public class FastBlankJavaService implements BasicLibraryService {
     @Override
     public boolean basicLoad(final Ruby runtime) throws IOException {
-        RubyModule protobuf_java_helpers = runtime.getModule("FastBlankJava");
-
-        RubyModule varinter = protobuf_java_helpers.defineModuleUnder(FastBlankJava.class.getSimpleName());
-        varinter.defineAnnotatedMethods(FastBlankJava.class);
+        RubyModule fast_blank_java = runtime.getModule("FastBlankJava");
+        fast_blank_java.defineAnnotatedMethods(FastBlankJava.class);
 
         return true;
     }

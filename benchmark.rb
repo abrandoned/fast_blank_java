@@ -25,9 +25,8 @@ test_strings = [
 ]
 
 test_strings.each do |s|
-  raise "failed on #{s.inspect}" if s.blank? != s.slow_blank?
-  raise "failed on #{s.inspect}" if s.blank? != s.new_slow_blank?
-  raise "failed on #{s.inspect}" if s.blank? != s.fast_blank_java?
+  raise "failed on #{s.inspect} blank? => #{s.blank?} : slow_blank? => #{s.slow_blank?}" if s.blank? != s.slow_blank?
+  raise "failed on #{s.inspect} blank? => #{s.blank?} : new_slow_blank? => #{s.new_slow_blank?}" if s.blank? != s.new_slow_blank?
 end
 
 test_strings.each do |s|
@@ -36,7 +35,15 @@ test_strings.each do |s|
     x.report("Fast Blank Java") do |times|
       i = 0
       while i < times
-        s.fast_blank_java?
+        s.blank?
+        i += 1
+      end
+    end
+
+    x.report("Fast Blank Java AS") do |times|
+      i = 0
+      while i < times
+        s.fast_blank_java_as?
         i += 1
       end
     end
